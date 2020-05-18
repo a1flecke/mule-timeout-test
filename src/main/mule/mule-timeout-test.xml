@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1b772447-51ae-4cc0-afa4-9be2b7b31bda" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="0f7e062a-4d0c-4cb5-bb30-29780d0ee21a" />
+	<flow name="mule-timeout-testFlow" doc:id="ed3d3665-1ad9-42ee-b45a-f78f38adea70" >
+		<http:listener doc:name="Listener" doc:id="a2667b31-c084-4304-a70c-6ea3f114bc68" config-ref="HTTP_Listener_config" path="/timeout">
+			<http:error-response statusCode="#[vars.httpStatus]" >
+				<http:body ><![CDATA[#[output text/plain --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<http:request method="GET" doc:name="Request" doc:id="ffc95ac0-6c40-43d5-8c72-e517a88ee222" config-ref="HTTP_Request_configuration" url="https://httpstat.us/200?sleep=180000" responseTimeout="200000"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c55ba631-ecb9-4d5c-8c46-07dcc80d2ef2" type="HTTP:TIMEOUT">
+				<set-payload value="Hey, I timed out" doc:name="Set Payload" doc:id="dfa8e089-9614-46fd-89db-fee7de3dacf9" />
+				<set-variable value="400" doc:name="Set Variable" doc:id="43d2e76b-c3bb-4349-a653-df48e5871314" variableName="httpStatus"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
